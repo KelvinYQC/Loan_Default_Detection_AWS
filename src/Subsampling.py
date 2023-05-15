@@ -1,7 +1,12 @@
 import os
 from pathlib import Path
-import pandas as pd
 from typing import Optional
+import logging
+import pandas as pd
+
+
+logger = logging.getLogger(__name__)
+
 
 def subsample_csv(input_file: Path, output_file: Path, fraction: float = 0.5, random_seed: Optional[int] = 42) -> None:
     """
@@ -18,7 +23,6 @@ def subsample_csv(input_file: Path, output_file: Path, fraction: float = 0.5, ra
     """
     # Read the CSV file into a pandas DataFrame
     data = pd.read_csv(input_file)
-    
     # Generate the subsample and save it to a new CSV file
     subsampled_data = data.sample(frac=fraction, random_state=random_seed)
     subsampled_data.to_csv(output_file, index=False)

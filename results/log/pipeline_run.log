@@ -1,0 +1,22 @@
+2023-05-14 23:52:05 - src.acquire_data - INFO - Acquiring data from: data/subsample_train.csv
+2023-05-14 23:52:05 - src.acquire_data - ERROR - Data file not found at: data/subsample_train.csv
+2023-05-14 23:53:36 - src.acquire_data - INFO - Acquiring data from: data/subsample_train.csv
+2023-05-14 23:55:48 - src.acquire_data - INFO - Acquiring data from: data/subsample_train.csv
+2023-05-14 23:55:50 - src.acquire_data - INFO - Saving acquired data to: runs/1684108548/meta_loan.data
+2023-05-14 23:56:01 - src.acquire_data - INFO - Data acquired successfully.
+2023-05-14 23:56:16 - src.train_model - DEBUG - Best parameters: {'classification__penalty': 'l2'}
+2023-05-14 23:56:16 - src.train_model - DEBUG - Best score: 0.589694
+2023-05-14 23:56:22 - src.train_model - DEBUG - Training and test data saved to runs/1684108548
+2023-05-14 23:56:22 - src.train_model - DEBUG - Model saved to runs/1684108548/trained_model_object.pkl
+2023-05-14 23:56:22 - src.score_model - DEBUG - Label TARGET dropped from test set.
+2023-05-14 23:56:22 - src.score_model - DEBUG - Predicted probabilities added to DataFrame.
+2023-05-14 23:56:22 - src.score_model - DEBUG - Binary predictions added to DataFrame.
+2023-05-14 23:56:22 - src.score_model - INFO - Scores saved to runs/1684108548/scores.csv
+2023-05-14 23:56:22 - src.evaluate_performance - DEBUG - AUC on test: 0.592
+2023-05-14 23:56:22 - src.evaluate_performance - DEBUG - confusion_matrix on test generated
+2023-05-14 23:56:22 - src.evaluate_performance - DEBUG - Accuracy on test: 0.587
+2023-05-14 23:56:22 - src.evaluate_performance - DEBUG - Classification report on test generated
+2023-05-14 23:56:22 - src.evaluate_performance - DEBUG - Precision score on test: 0.088
+2023-05-14 23:56:22 - src.evaluate_performance - INFO - Evaluation completed
+2023-05-14 23:56:22 - src.evaluate_performance - INFO - Results: {'roc_auc_score': '0.5921731920109596', 'confusion_matrix': '[[14563, 10093], [826, 974]]', 'accuracy_score': '0.5872769882068339', 'classification_report': "{'0': {'precision': 0.9463252972902723, 'recall': 0.5906473069435432, 'f1-score': 0.7273317517792482, 'support': 24656}, '1': {'precision': 0.08800939730731001, 'recall': 0.5411111111111111, 'f1-score': 0.15139504157923367, 'support': 1800}, 'accuracy': 0.5872769882068339, 'macro avg': {'precision': 0.5171673472987911, 'recall': 0.5658792090273271, 'f1-score': 0.43936339667924096, 'support': 26456}, 'weighted avg': {'precision': 0.8879276324894961, 'recall': 0.5872769882068339, 'f1-score': 0.6881464600359753, 'support': 26456}}", 'precision_score': '0.08800939730731001'}
+2023-05-14 23:56:22 - src.evaluate_performance - INFO - Results saved to runs/1684108548/metrics.yaml

@@ -27,3 +27,34 @@ The architecture for our design is depicted in the graph below, showcasing the d
 This diagram provides an overview of the key components and their connections within our system. It highlights the integration of AWS services, including data storage, model training, and deployment.
 
 With this architecture in place, we are able to achieve reliable and efficient predictions for loan default detection, empowering organizations to make informed decisions and mitigate financial risks.
+
+
+## Docker 
+Build the image
+```bash
+docker build -t loan . -f dockerfiles/Dockerfile
+```
+
+### Run Pipeline
+```bash
+docker run \
+-v $(pwd)/results:/app/runs \
+-v $(pwd)/config:/app/config \
+-v $(pwd)/results/log:/app/logs \
+loan
+```
+
+
+## Run Unit Tests
+
+Navigate to the `2023-423-ycj6475-hw2` directory and Use dockerfile named Dockerfile_UintTest to build a docker image for unit tests:
+
+```bash
+docker build -t loan_test . -f dockerfiles/Dockerfile_UintTest
+```
+
+Run the build docker image to run the tests.
+
+```bash
+docker run loan_test
+```
