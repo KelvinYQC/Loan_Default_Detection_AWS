@@ -19,31 +19,33 @@ This machine learning model has been trained and deployed on AWS, utilizing its 
 
 The architecture for our design is depicted in the graph below, showcasing the different components and their interactions.
 
-
 [Insert Architecture Graph Image Here]
-
-
 
 This diagram provides an overview of the key components and their connections within our system. It highlights the integration of AWS services, including data storage, model training, and deployment.
 
 With this architecture in place, we are able to achieve reliable and efficient predictions for loan default detection, empowering organizations to make informed decisions and mitigate financial risks.
 
+## Docker
 
-## Docker 
 Build the image
+
 ```bash
 docker build -t loan . -f dockerfiles/Dockerfile
 ```
 
 ### Run Pipeline
+
 ```bash
 docker run \
 -v $(pwd)/results:/app/runs \
 -v $(pwd)/config:/app/config \
 -v $(pwd)/results/log:/app/logs \
+-e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
+-e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
+-e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
+
 loan
 ```
-
 
 ## Run Unit Tests
 
