@@ -57,7 +57,7 @@ if __name__ == "__main__":
     s3_key = str("subsample_train.csv")
     BUCKET_NAME = aws_config.get("bucket_name", " msia-423-group2-loan")
     BUCKET_NAME = os.getenv("BUCKET_NAME", BUCKET_NAME)
-    data = ad.load_data(artifacts / "clouds.data", BUCKET_NAME, s3_key)
+    data = ad.load_data(artifacts / "loans.data", BUCKET_NAME, s3_key)
 
     # Create structured dataset from raw data; save to disk
     data = cd.create_dataset(data, config["create_dataset"]["drop_columns"])
@@ -65,8 +65,15 @@ if __name__ == "__main__":
 
     # Split data into train/test set and train model based on config; save each to disk
     train, test, X_train, X_test, y_train, y_test = tm.split_data(data, **config["split_data"])
-    # logistic regression
-    tmo, logustic_best_params_, logustic_best_score_ = tm.logistic_regression(X_train,y_train, **config["Logistic_regression"])
+    # model
+    model_type = run_config.get("model", "Logistic_classification")
+    logger.info('model_type: %s', model_type)
+    if model_type == "Logistic_classification":
+        tmo, best_params_, best_score_ = tm.logistic_regression(X_train,y_train, **config["Logistic_classification"])
+    elif model_type == "histgbm_classification":
+        tmo, best_params_, best_score_ = tm.histgbm_classification(X_train,y_train, **config["histgbm_classification"])
+    elif model_type == "random_forest_classification":
+        tmo, best_params_, best_score_ = tm.random_forest_classification(X_train,y_train, **config["random_forest_classification"])
     tm.save_data(train, test, artifacts)
     # tm.save_model(tmo, artifacts / "trained_model_object.pkl")
 

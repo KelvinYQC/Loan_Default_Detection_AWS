@@ -6,7 +6,8 @@ run_config:
   dependencies: requirements.txt
   data_source: data/subsample_train.csv
   warnings_setting: ignore
-  version: default
+  version: Logistic_classification
+  model: Logistic_classification
 
 create_dataset:
   drop_columns:
@@ -92,15 +93,36 @@ split_data:
   test_size: 0.4
   random_seed: 42
 
-Logistic_regression:
+
+Logistic_classification:
   params:
     classification__penalty:
       - l2
       - l1
-  cv: 5
+  cv: 3
+  random_seed: 42
+  scoring: roc_auc
+  
+
+histgbm_classification:
+  params:
+    max_depth: [3]
+    learning_rate: [0.1]
+  n_iter: 10
+  cv: 3
   random_seed: 42
   scoring: roc_auc
 
+random_forest_classification:
+  params:
+    n_estimators: [300]
+    max_depth: [5, 7]
+    min_samples_split: [2, 5]
+    min_samples_leaf: [1, 4]
+  n_iter: 3
+  cv: 3
+  random_seed: 42
+  scoring: roc_auc
 
 score_model:
   target: TARGET

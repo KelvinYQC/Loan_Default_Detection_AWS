@@ -30,7 +30,7 @@ With this architecture in place, we are able to achieve reliable and efficient p
 Build the image
 
 ```bash
-docker build -t loan . -f dockerfiles/Dockerfile
+docker build -t cloud_loan . -f dockerfiles/Dockerfile
 ```
 
 ### Run Pipeline
@@ -43,8 +43,7 @@ docker run \
 -e AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID \
 -e AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
 -e AWS_SESSION_TOKEN=$AWS_SESSION_TOKEN \
-
-loan
+cloud_loan
 ```
 
 ## Run Unit Tests

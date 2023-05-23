@@ -10,9 +10,9 @@ from imblearn.over_sampling import SMOTE
 from imblearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
-
-
-
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import RandomizedSearchCV
 
 
 logger = logging.getLogger(__name__)
@@ -111,4 +111,68 @@ def logistic_regression(X_train: Any, y_train: Any, params: Dict[str, Any], cv: 
         return out.best_estimator_, out.best_params_, out.best_score_
     except Exception as e:
         logger.error("Error occurred while performing logistic regression: %s", str(e))
+        raise
+
+
+
+def histgbm_classification(X_train: Any, y_train: Any, 
+                           params: Dict[str, Any], 
+                           cv: int = 5,
+                           random_seed: int = 42, 
+                           n_iter: int = 10,
+                           scoring: str = 'roc_auc') -> Tuple[Any, Dict[str, Any], float]:
+    """
+    Perform classification using HistGradientBoostingClassifier with grid search.
+
+    Args:
+        X_train: Training features.
+        y_train: Training target.
+        params: Dictionary of parameter grid for grid search.
+        cv: Number of cross-validation folds (default: 5).
+        random_seed: Random seed for reproducibility (default: 42).
+        scoring: Scoring metric for grid search (default: 'roc_auc').
+
+    Returns:
+        Tuple containing the best estimator, best parameters, and best score.
+    """
+    try:
+        model = HistGradientBoostingClassifier(random_state=random_seed)
+        out = RandomizedSearchCV(model, param_distributions=params, scoring=scoring,n_iter=n_iter, cv=cv, random_state=random_seed)
+        out.fit(X_train, y_train)
+        logger.debug("Best parameters: %s", out.best_params_)
+        logger.debug("Best score: %f", out.best_score_)
+        return out.best_estimator_, out.best_params_, out.best_score_
+    except Exception as e:
+        logger.error("Error occurred while performing classification with HistGradientBoostingClassifier: %s", str(e))
+        raise
+
+def random_forest_classification(X_train: Any, y_train: Any, 
+                                 params: Dict[str, Any], 
+                                 cv: int = 5,
+                                 n_iter: int = 10,
+                                 random_seed: int = 42, 
+                                 scoring: str = 'roc_auc') -> Tuple[Any, Dict[str, Any], float]:
+    """
+    Perform classification using Random Forest Classifier with pipeline and random search.
+
+    Args:
+        X_train: Training features.
+        y_train: Training target.
+        params: Dictionary of parameter distributions for random search.
+        cv: Number of cross-validation folds (default: 5).
+        random_seed: Random seed for reproducibility (default: 42).
+        scoring: Scoring metric for random search (default: 'roc_auc').
+
+    Returns:
+        Tuple containing the best estimator, best parameters, and best score.
+    """
+    try:
+        model = RandomForestClassifier(random_state=random_seed)
+        out = RandomizedSearchCV(model, param_distributions=params, scoring=scoring,n_iter=n_iter, cv=cv, random_state=random_seed)
+        out.fit(X_train, y_train)
+        logger.debug("Best parameters: %s", out.best_params_)
+        logger.debug("Best score: %f", out.best_score_)
+        return out.best_estimator_, out.best_params_, out.best_score_
+    except Exception as e:
+        logger.error("Error occurred while performing classification with Random Forest Classifier: %s", str(e))
         raise
