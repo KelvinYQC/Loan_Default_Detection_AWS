@@ -6,6 +6,7 @@ run_config:
   dependencies: requirements.txt
   data_source: data/subsample_train.csv
   warnings_setting: ignore
+  version: default
 
 create_dataset:
   drop_columns:
@@ -115,3 +116,9 @@ evaluate_performance:
     - accuracy_score
     - classification_report
     - precision_score
+
+aws:
+  upload: True
+  bucket_name: msia-423-group2-loan
+  prefix: cloud_models
+  region_name: us-east-1

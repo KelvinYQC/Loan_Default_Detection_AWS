@@ -1,6 +1,28 @@
 import logging
 import pandas as pd
+import src.aws_utils as aws
+from pathlib import Path
+import numpy as np
+import pandas as pd
+
 logger = logging.getLogger(__name__)
+
+def load_data(data_file: Path, BUCKET_NAME, s3_key: str) -> np.ndarray:
+    """
+    Load data from a file into memory.
+
+    Args:
+        data_file (Path): Path to the data file.
+        s3_key (str): S3 key for downloading the data file.
+
+    Returns:
+        np.ndarray: Loaded data.
+    """
+    print("Loading artifacts from: ", data_file)
+    aws.download_s3(BUCKET_NAME, s3_key, data_file)
+    # Load files into memory
+    dat = pd.read_csv(data_file)
+    return dat
 
 
 def acquire_data(data_address: str, output_file: str) -> pd.DataFrame:
