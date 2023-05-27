@@ -143,4 +143,4 @@ aws:
   upload: True
   bucket_name: msia-423-group2-loan
   prefix: cloud_models
-  region_name: us-east-1
+  region_name: us-east-2
