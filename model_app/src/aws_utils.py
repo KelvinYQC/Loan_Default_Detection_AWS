@@ -1,8 +1,5 @@
-import os
-import sys
 from pathlib import Path
 import logging
-import glob
 import boto3
 from botocore.exceptions import BotoCoreError, NoCredentialsError
 
