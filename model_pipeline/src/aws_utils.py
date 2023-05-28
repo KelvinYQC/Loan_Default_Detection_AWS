@@ -5,6 +5,7 @@ import logging
 import glob
 import boto3
 import botocore.exceptions
+from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
 
@@ -84,3 +85,35 @@ def upload_artifacts(artifacts: Path, config: dict) -> list[str]:
         s3_uris.append(s3_uri)
     logger.info("Uploaded artifacts to S3 to bucket: %s", bucket_name)
     return s3_uris
+
+
+@dataclass
+class Message:
+    handle: str
+    body: str
+
+
+def get_messages(
+    queue_url: str,
+    max_messages: int = 1,
+    wait_time_seconds: int = 20,
+) -> list[Message]:
+    sqs = boto3.client("sqs")
+    try:
+        response = sqs.receive_message(
+            QueueUrl=queue_url,
+            MaxNumberOfMessages=max_messages,
+            WaitTimeSeconds=wait_time_seconds,
+        )
+    except botocore.exceptions.ClientError as e:
+        print(e)
+        logger.error(e)
+        return []
+    if "Messages" not in response:
+        return []
+    return [Message(m["ReceiptHandle"], m["Body"]) for m in response["Messages"]]
+
+
+def delete_message(queue_url: str, receipt_handle: str):
+    sqs = boto3.client("sqs")
+    sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=receipt_handle)

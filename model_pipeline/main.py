@@ -1,12 +1,19 @@
+#!/usr/bin/python3
+
 import argparse
 import datetime
 import os
+import re
 import warnings
 import logging.config
 from pathlib import Path
 import yaml
 import logging
 import joblib
+import botocore
+import json
+from time import sleep
+import typer
 
 import src.acquire_data as ad
 import src.create_data as cd
@@ -20,24 +27,34 @@ import src.evaluate_performance as ep
 logging.config.fileConfig("config/logging_config.conf")
 logger = logging.getLogger("pipeline")
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Pipelines for training and evaluating a model for predicting Loan Default"
-    )
-    parser.add_argument(
-        "--config", default="config/pipeline_config.yaml", help="Path to configuration file"
-    )
-    args = parser.parse_args()
+artifacts = Path() / "artifacts"
+ARTIFACTS_PREFIX = os.getenv("ARTIFACTS_PREFIX", "artifacts/")
+BUCKET_NAME = os.getenv("BUCKET_NAME", "msia-423-group2-loan")
 
-    # Load configuration file for parameters and run config
-    with open(args.config, "r", encoding='utf-8') as f:
+
+def load_config(config_ref: str) -> dict:
+    if config_ref.startswith("s3://"):
+        # Get config file from S3
+        config_file = Path("config/downloaded-config.yaml")
         try:
-            config = yaml.load(f, Loader=yaml.FullLoader)
-        except yaml.error.YAMLError as e:
-            logger.error("Error while loading configuration from %s", args.config)
-        else:
-            logger.info("Configuration file loaded from %s", args.config)
+            bucket, key = re.match(r"s3://([^/]+)/(.+)", config_ref).groups()
+            aws.download_s3(bucket, key, config_file)
+        except AttributeError:  # If re.match() does not return groups
+            print("Could not parse S3 URI: ", config_ref)
+            config_file = Path("config/default.yaml")
+        except botocore.exceptions.ClientError as e:  # If there is an error downloading
+            print("Unable to download config file from S3: ", config_ref)
+            print(e)
+    else:
+        # Load config from local path
+        config_file = Path(config_ref)
+    if not config_file.exists():
+        raise EnvironmentError(f"Config file at {config_file.absolute()} does not exist")
 
+    with config_file.open() as f:
+        return yaml.load(f, Loader=yaml.SafeLoader)
+    
+def run_pipeline(config):
     run_config = config.get("run_config", {})
     aws_config = config.get("aws", {})
     version = run_config.get("version", "default")
@@ -48,8 +65,7 @@ if __name__ == "__main__":
     artifacts = Path(run_config.get("output", "runs"))
     artifacts = artifacts / version
     artifacts.mkdir(parents=True, exist_ok=True)
-
-
+    
     # Save config file to artifacts directory for traceability
     with (artifacts / "pipelnie-config.yaml").open("w") as f:
         yaml.dump(config, f)
@@ -96,3 +112,55 @@ if __name__ == "__main__":
     if aws_config.get("upload", False):
         aws.upload_artifacts(artifacts, aws_config)
     logger.info("Process Finished")
+
+def process_message(msg: aws.Message):
+    message_body = json.loads(msg.body)
+    bucket_name = message_body["detail"]["bucket"]["name"]
+    object_key = message_body["detail"]["object"]["key"]
+    config_uri = f"s3://{bucket_name}/{object_key}"
+    logger.info("Running pipeline with config from: %s", config_uri)
+    config = load_config(config_uri)
+    run_pipeline(config)
+
+def main(
+    sqs_queue_url: str,
+    max_empty_receives: int = 3,
+    delay_seconds: int = 3,
+    wait_time_seconds: int = 10,):
+    
+
+    empty_receives = 0
+    while empty_receives < max_empty_receives:
+        logger.info("Polling queue for messages...")
+        messages = aws.get_messages(
+            sqs_queue_url,
+            max_messages=2,
+            wait_time_seconds=wait_time_seconds,
+        )
+        logger.info("Received %d messages from queue", len(messages))
+        
+        if len(messages) == 0:
+            # Increment our empty receive count by one if no messages come back
+            empty_receives += 1
+            sleep(delay_seconds)
+            continue
+
+        # Reset empty receive count if we get messages back
+        empty_receives = 0
+        for m in messages:
+            # Perform work based on message content
+            try:
+                process_message(m)
+            # We want to suppress all errors so that we can continue processing next message
+            except Exception as e:
+                logger.error("Unable to process message, continuing...")
+                logger.error(e)
+                continue
+            # We must explicitly delete the message after processing it
+            aws.delete_message(sqs_queue_url, m.handle)
+        # Pause before asking the queue for more messages
+        sleep(delay_seconds)
+
+
+if __name__ == "__main__":
+    typer.run(main)
