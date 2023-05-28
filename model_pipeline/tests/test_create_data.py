@@ -40,5 +40,6 @@ def test_save_dataset_file_not_found(tmp_path: Path) -> None:
     with pytest.raises(OSError) as exc_info:
         cd.save_dataset(data, output_file)
 
-    expected_error_message = f"Cannot save file into a non-existent directory: '{output_file.parent}'"
+    expected_error_message = \
+        f"Cannot save file into a non-existent directory: '{output_file.parent}'"
     assert str(exc_info.value) == expected_error_message

@@ -18,7 +18,8 @@ import src.score_model as sm
 import src.aws_utils as aws
 import src.evaluate_performance as ep
 
-
+# This pipline is for running the model locally and uploading the artifacts to S3.
+# It does not have event trigger and is not used in the AWS pipeline.
 
 logging.config.fileConfig("config/logging_config.conf")
 logger = logging.getLogger("pipeline")
@@ -29,6 +30,16 @@ BUCKET_NAME = os.getenv("BUCKET_NAME", "msia-423-group2-loan")
 
 
 def load_config(config_ref: str) -> dict:
+    """
+    Load a configuration file from either an S3 bucket or a local path.
+    Args:
+        config_ref (str): The reference to the configuration file,
+        which can be an S3 URI (starting with "s3://") or a local file path.
+    Returns:
+        dict: The loaded configuration as a dictionary.
+    Raises:
+        EnvironmentError: If the specified configuration file does not exist.
+    """
     if config_ref.startswith("s3://"):
         # Get config file from S3
         config_file = Path("config/downloaded-config.yaml")
@@ -49,7 +60,6 @@ def load_config(config_ref: str) -> dict:
 
     with config_file.open() as f:
         return yaml.load(f, Loader=yaml.SafeLoader)
-    
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -100,27 +110,22 @@ if __name__ == "__main__":
     model_type = run_config.get("model", "Logistic_classification")
     logger.info('model_type: %s', model_type)
     if model_type == "Logistic_classification":
-        tmo, best_params_, best_score_ = tm.logistic_regression(X_train,y_train, **config["Logistic_classification"])
+        tmo, best_params_, best_score_ = \
+            tm.logistic_regression(X_train,y_train, **config["Logistic_classification"])
     elif model_type == "histgbm_classification":
-        tmo, best_params_, best_score_ = tm.histgbm_classification(X_train,y_train, **config["histgbm_classification"])
+        tmo, best_params_, best_score_ = \
+            tm.histgbm_classification(X_train,y_train, **config["histgbm_classification"])
     elif model_type == "random_forest_classification":
-        tmo, best_params_, best_score_ = tm.random_forest_classification(X_train,y_train, **config["random_forest_classification"])
+        tmo, best_params_, best_score_ = \
+            tm.random_forest_classification(X_train,y_train, **config["random_forest_classification"])
     tm.save_data(train, test, artifacts)
-    # tm.save_model(tmo, artifacts / "trained_model_object.pkl")
-
     # Score model on test set; save scores to disk
     scores = sm.score_model(test, tmo, **config["score_model"])
-    # sm.save_scores(scores, artifacts / "scores.csv")
-    
     # Evaluate model performance metrics; save metrics to disk
     metrics = ep.evaluate_performance(scores,test, **config["evaluate_performance"])
-    # ep.save_metrics(metrics, artifacts / "metrics.yaml")
-    
-        
     joblib.dump(data, artifacts / "data.joblib")
     joblib.dump(tmo, artifacts / "classifier.joblib")
     joblib.dump(metrics, artifacts / "metrics.joblib")
-
     logger.info("Local process run completed successfully")
     # # Upload all artifacts to S3
     aws_config = config.get("aws")

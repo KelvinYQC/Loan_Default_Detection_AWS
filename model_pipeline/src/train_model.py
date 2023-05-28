@@ -18,7 +18,11 @@ from sklearn.model_selection import RandomizedSearchCV
 logger = logging.getLogger(__name__)
 
 
-def split_data(data: pd.DataFrame, target: str, test_size: float, random_seed: int) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, Any, Any]:
+def split_data(data: pd.DataFrame,
+               target: str,
+               test_size: float,
+               random_seed: int
+               ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, Any, Any]:
     """
     Split the data into training and test sets.
 
@@ -43,7 +47,8 @@ def split_data(data: pd.DataFrame, target: str, test_size: float, random_seed: i
             y = data[target]
         except KeyError:
             logger.error("Target column %s does not exist.", target)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_seed)
+        X_train, X_test, y_train, y_test = \
+            train_test_split(X, y, test_size=test_size, random_state=random_seed)
         train = pd.concat([X_train, y_train], axis=1)
         test = pd.concat([X_test, y_test], axis=1)
         return train, test, X_train, X_test, y_train, y_test
@@ -81,10 +86,12 @@ def save_model(model, artifacts: Path) -> None:
     with open(artifacts, "wb") as f:
         pickle.dump(model, f)
     logger.debug("Model saved to %s", artifacts)
-
-
-def logistic_regression(X_train: Any, y_train: Any, params: Dict[str, Any], cv: int = 5,
-                        random_seed: int = 42, scoring: str = 'roc_auc') -> Tuple[Any, Dict[str, Any], float]:
+def logistic_regression(X_train: Any,
+                        y_train: Any,
+                        params: Dict[str, Any],
+                        cv: int = 5,
+                        random_seed: int = 42,
+                        scoring: str = 'roc_auc') -> Tuple[Any, Dict[str, Any], float]:
     """
     Perform logistic regression using pipeline and grid search.
 
@@ -112,13 +119,10 @@ def logistic_regression(X_train: Any, y_train: Any, params: Dict[str, Any], cv: 
     except Exception as e:
         logger.error("Error occurred while performing logistic regression: %s", str(e))
         raise
-
-
-
-def histgbm_classification(X_train: Any, y_train: Any, 
-                           params: Dict[str, Any], 
+def histgbm_classification(X_train: Any, y_train: Any,
+                           params: Dict[str, Any],
                            cv: int = 5,
-                           random_seed: int = 42, 
+                           random_seed: int = 42,
                            n_iter: int = 10,
                            scoring: str = 'roc_auc') -> Tuple[Any, Dict[str, Any], float]:
     """
@@ -137,20 +141,24 @@ def histgbm_classification(X_train: Any, y_train: Any,
     """
     try:
         model = HistGradientBoostingClassifier(random_state=random_seed)
-        out = RandomizedSearchCV(model, param_distributions=params, scoring=scoring,n_iter=n_iter, cv=cv, random_state=random_seed)
+        out = RandomizedSearchCV(model,
+                                 param_distributions=params,
+                                 scoring=scoring,
+                                 n_iter=n_iter,
+                                 cv=cv,
+                                 random_state=random_seed)
         out.fit(X_train, y_train)
         logger.debug("Best parameters: %s", out.best_params_)
         logger.debug("Best score: %f", out.best_score_)
         return out.best_estimator_, out.best_params_, out.best_score_
     except Exception as e:
-        logger.error("Error occurred while performing classification with HistGradientBoostingClassifier: %s", str(e))
+        logger.error("Error while performing classification with HGBT: %s", str(e))
         raise
-
-def random_forest_classification(X_train: Any, y_train: Any, 
-                                 params: Dict[str, Any], 
+def random_forest_classification(X_train: Any, y_train: Any,
+                                 params: Dict[str, Any],
                                  cv: int = 5,
                                  n_iter: int = 10,
-                                 random_seed: int = 42, 
+                                 random_seed: int = 42,
                                  scoring: str = 'roc_auc') -> Tuple[Any, Dict[str, Any], float]:
     """
     Perform classification using Random Forest Classifier with pipeline and random search.
@@ -168,11 +176,16 @@ def random_forest_classification(X_train: Any, y_train: Any,
     """
     try:
         model = RandomForestClassifier(random_state=random_seed)
-        out = RandomizedSearchCV(model, param_distributions=params, scoring=scoring,n_iter=n_iter, cv=cv, random_state=random_seed)
+        out = RandomizedSearchCV(model,
+                                 param_distributions=params,
+                                 scoring=scoring,
+                                 n_iter=n_iter,
+                                 cv=cv,
+                                 random_state=random_seed)
         out.fit(X_train, y_train)
         logger.debug("Best parameters: %s", out.best_params_)
         logger.debug("Best score: %f", out.best_score_)
         return out.best_estimator_, out.best_params_, out.best_score_
     except Exception as e:
-        logger.error("Error occurred while performing classification with Random Forest Classifier: %s", str(e))
+        logger.error("Error occurred while performing Random Forest Classifier: %s", str(e))
         raise

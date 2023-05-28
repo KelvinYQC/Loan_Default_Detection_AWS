@@ -8,7 +8,10 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def subsample_csv(input_file: Path, output_file: Path, fraction: float = 0.5, random_seed: Optional[int] = 42) -> None:
+def subsample_csv(input_file: Path,
+                  output_file: Path,
+                  fraction: float = 0.5,
+                  random_seed: Optional[int] = 42) -> None:
     """
     Subsamples a CSV file and saves the subsample to a new file.
 
