@@ -2,5 +2,7 @@ home-credit-default-risk/
 data/
 .DS_Store
 .venv
+.myenv
 runs/
 results/
+cloud_models/
