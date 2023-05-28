@@ -23,14 +23,18 @@ def download_s3(bucket_name: str, object_key: str, local_file_path) -> None:
     """
     local_file_path = Path(local_file_path)
     # Create the parent directory if it doesn't exist
-    local_file_path.parent.mkdir(parents=True, exist_ok=True)  
-    s3 = boto3.client("s3")
+    local_file_path.parent.mkdir(parents=True, exist_ok=True)
+    aws_s3 = boto3.client("s3")
     print(f"Fetching Key: {object_key} from S3 Bucket: {bucket_name}")
     try:
-        s3.download_file(bucket_name, object_key, str(local_file_path))
+        aws_s3.download_file(bucket_name, object_key, str(local_file_path))
         print(f"File downloaded successfully to {local_file_path}")
-    except Exception as e:
-        print(f"Error downloading file: {e}")
+    except NoCredentialsError as e:
+        logger.error("NoCredentialsError occurred while versions from bucket %s: %s",
+                    bucket_name, str(e))
+    except BotoCoreError as e:
+        logger.error("BotoCoreError occurred while loading from bucket %s: %s",
+                     bucket_name, str(e))
 
 
 def load_model_versions(bucket_name: str, prefix: str):
@@ -46,12 +50,12 @@ def load_model_versions(bucket_name: str, prefix: str):
     """
     model_versions = []
     try:
-        aws_s3 = boto3.client('s3', region_name='us-east-2')
+        aws_s3 = boto3.client("s3", region_name="us-east-2")
         response = aws_s3.list_objects_v2(
-            Bucket=bucket_name, Prefix=prefix + '/', Delimiter='/')
+            Bucket=bucket_name, Prefix=prefix + "/", Delimiter="/")
         # Extract the subfolder names
-        subfolders = [content.get('Prefix')
-                      for content in response.get('CommonPrefixes', [])]
+        subfolders = [content.get("Prefix")
+                      for content in response.get("CommonPrefixes", [])]
         model_versions = [Path(subfolder).name for subfolder in subfolders]
         logger.info("Loaded %d model versions from bucket %s with prefix %s", len(
             model_versions), bucket_name, prefix)
