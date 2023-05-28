@@ -60,6 +60,7 @@ def load_config(config_ref: str = 'config/pipeline_config.yaml') -> dict:
     logger.info("Loading config from: %s", config_file)
     with config_file.open() as f:
         return yaml.load(f, Loader=yaml.SafeLoader)
+
 def run_pipeline(config, data_path=None):
     """
     Run the pipeline process with the given configuration.
@@ -129,6 +130,7 @@ def run_pipeline(config, data_path=None):
     if aws_config.get("upload", False):
         aws.upload_artifacts(artifacts, aws_config)
     logger.info("Process Finished")
+
 def process_message(msg: aws.Message):
     """
     Process the given AWS message.
@@ -166,9 +168,12 @@ def main(
     Polls an SQS queue for messages and processes them.
     Args:
         sqs_queue_url (str): The URL of the SQS queue to poll.
-        max_empty_receives (int, optional): The maximum number of consecutive empty receives before exiting the loop. Defaults to 3.
-        delay_seconds (int, optional): The delay in seconds before polling for more messages. Defaults to 3.
-        wait_time_seconds (int, optional): The maximum time in seconds to wait for a message. Defaults to 10.
+        max_empty_receives (int, optional): 
+            The maximum number of consecutive empty receives before exiting the loop. Defaults to 3.
+        delay_seconds (int, optional): 
+            The delay in seconds before polling for more messages. Defaults to 3.
+        wait_time_seconds (int, optional): 
+            The maximum time in seconds to wait for a message. Defaults to 10.
     """
     empty_receives = 0
     while empty_receives < max_empty_receives:
