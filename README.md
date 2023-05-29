@@ -21,7 +21,12 @@ Please download the dataset from the provided link and place it in the `data` di
 
 ### Model Development
 
-The loan default detection model leverages machine learning models and utilizes various features such as applicant information, credit history, and previous loan details to make predictions. The model has been trained using XXX MODEL with XXX performance. A detailed implementation code can be find in the  `model_pipeline/src`/ folder.
+The loan default detection model leverages machine learning models and utilizes various features such as applicant information, credit history, and previous loan details to make predictions. The model has been trained using the following models:
+- Random Forest Classifier (1 shallow, 1 deep)
+- Logistic Regression Classifier
+- LightGBM Classifier
+
+A detailed implementation code can be find in the  `model_pipeline/src`/ folder.
 
 ### Deployment on AWS
 
@@ -72,11 +77,11 @@ With this architecture in place, we are able to achieve reliable and efficient p
 │   │   ├── Subsampling.py          <- Python script that takes samples of data
 │   │   └── train_model.py          <- Python script that performs model training
 │   ├── tests/                      <- Directory for running unit tests
-│   │   ├── pipeline_modeling.py    <- Python script that tests modeling
-│   │   └── main.py                 <- Python script that tests the pipeline
-│   ├── pipeline_modeling.py        <- Python script that runs pipeline
-│   └── main.py                     <- Python script that runs model
-└── └──requirements.txt                <- Text file for python package dependencies for running application
+│   │   ├── pipeline_modeling.py    <- Python script that tests local pipeline 
+│   │   └── main.py                 <- Python script that tests event-driven pipeline
+│   ├── pipeline_modeling.py        <- Python script for training the model locally and upload to S3
+│   └── main.py                     <- Python script for automatic retraining model after updates on S3 bucket
+└── └──requirements.txt             <- Text file for python package dependencies for running pipeline
 ```
 
 ## Environment Setup
@@ -136,6 +141,7 @@ echo $AWS_SECRET_ACCESS_KEY
 ## Docker Instructions
 
 ### Docker for Model Pipeline 
+Please navigate to the `model_pipeline` directory to complete the following steps:
 
 #### Build the image
 
@@ -158,8 +164,6 @@ cloud_loan
 
 #### Run Unit Tests
 
-Navigate to the `model_pipeline` directory and Use dockerfile named Dockerfile_UintTest to build a docker image for unit tests:
-
 ```bash
 docker build -t loan_test . -f Dockerfiles/Dockerfile.UintTest
 ```
@@ -171,7 +175,9 @@ docker run loan_test
 ```
 ### Docker for Streamlit Application
 
-#### Build the Docker image for application
+#### Build the Docker image for 
+
+Please navigate to `model_app` directory to complete the following steps.
 
 ```bash
 docker build -f dockerfiles/Dockerfile -t loan-app .
