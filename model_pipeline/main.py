@@ -30,17 +30,19 @@ ARTIFACTS_PREFIX = os.getenv("ARTIFACTS_PREFIX", "artifacts/")
 BUCKET_NAME = os.getenv("BUCKET_NAME", "msia-423-group2-loan")
 
 
-def load_config(config_ref: str = 'config/pipeline_config.yaml') -> dict:
+def load_config(config_ref: str) -> dict:
     """
     Load the configuration file specified by the `config_ref`.
     Args:
         config_ref (str): Optional. The reference to the configuration file.
-                          Defaults to 'config/pipeline_config.yaml'.
     Returns:
         dict: The loaded configuration as a dictionary.
     Raises:
         EnvironmentError: If the specified config file does not exist.
     """
+    if config_ref is None:
+        config_ref = "config/pipeline_config.yaml"
+    logger.info("config_ref: %s", config_ref)
     if config_ref.startswith("s3://"):
         # Get config file from S3
         config_file = Path("config/downloaded-config.yaml")
@@ -152,7 +154,8 @@ def process_message(msg: aws.Message):
     elif object_key.startswith("data/"):
         data_uri = f"s3://{bucket_name}/{object_key}"
         logger.info("Running pipeline with data from: %s", data_uri)
-        config = load_config()
+        config_file= os.getenv("config_location", None)
+        config = load_config(config_file)
         logger.info("Data loaded successfully")
         run_pipeline(config, data_path=object_key)
     else:
