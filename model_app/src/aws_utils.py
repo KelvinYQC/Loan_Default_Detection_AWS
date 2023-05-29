@@ -52,7 +52,7 @@ def load_model_versions(bucket_name: str, prefix: str):
     try:
         aws_s3 = boto3.client("s3", region_name="us-east-2")
         response = aws_s3.list_objects_v2(
-            Bucket=bucket_name, Prefix=prefix + "/", Delimiter="/")
+            Bucket=bucket_name, Prefix=str(prefix) + "/", Delimiter="/")
         # Extract the subfolder names
         subfolders = [content.get("Prefix")
                       for content in response.get("CommonPrefixes", [])]
