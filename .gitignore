@@ -3,6 +3,8 @@ data/
 .DS_Store
 .venv
 .myenv
+.virenv
 runs/
 results/
 cloud_models/
+__pycache__/

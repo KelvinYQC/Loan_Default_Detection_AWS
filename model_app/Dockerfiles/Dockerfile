@@ -10,7 +10,8 @@ RUN pip install -r requirements.txt
 
 COPY config ./config
 COPY src ./src
+COPY app.py app.py
 
 EXPOSE 80
 
-CMD ["streamlit", "run", "--server.port=80", "--server.address=0.0.0.0", "--server.fileWatcherType=none", "src/app.py"]
+CMD ["streamlit", "run", "--server.port=80", "--server.address=0.0.0.0", "--server.fileWatcherType=none", "app.py"]

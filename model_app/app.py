@@ -7,7 +7,7 @@ import streamlit as st
 import joblib
 import numpy as np
 import pandas as pd
-import aws_utils as aws
+import src.aws_utils as aws
 
 
 logger = logging.getLogger(__name__)
