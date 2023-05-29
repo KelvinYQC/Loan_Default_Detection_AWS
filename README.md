@@ -29,7 +29,7 @@ This machine learning model has been trained and deployed on AWS, utilizing its 
 
 The architecture for our design is depicted in the graph below, showcasing the different components and their interactions.
 
-[Insert Architecture Graph Image Here]
+![AWS Architecture](images/AWS%20Architecture.png)
 
 This diagram provides an overview of the key components and their connections within our system. It highlights the integration of AWS services, including data storage, model training, and deployment.
 
